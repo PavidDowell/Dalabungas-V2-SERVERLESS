@@ -1,0 +1,105 @@
+
+########### DALABUNGAS A YIK YAK ALTERNATIVE !#########
+###########       AHMAD BADERKHAN      ###############
+######################################################
+service: Crm-Integration
+############ PROVIDER
+provider:
+  name: aws
+  runtime: nodejs10.x
+  environment:
+    KMS_KEY_ID : ${self:custom.KMS_KEY_ID}
+    FUNCTION_BASE_NAME : ${self:custom.FUNCTION_BASE_NAME}
+    COLLECTOR_FN : ${self:custom.COLLECTOR_FN}
+    SCHEDULER_DAILY_FN : ${self:custom.SCHEDULER_DAILY_FN}
+    CRM_API_FN :  ${self:custom.CRM_API_FN}
+    AUDIENCE_API_ENDPOINT : ${self:custom.AUDIENCE_API_ENDPOINT}
+    DYNAMO_JOB_NOTIFICATION_TABLE : ${self:custom.DYNAMO_JOB_NOTIFICATION_TABLE}
+    DYNAMO_CLIENT_CONFIG_NAME : ${self:custom.DYNAMO_CLIENT_CONFIG_NAME}
+    YV_AUTO_EMAIL : ${self:custom.YV_AUTO_EMAIL}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "dynamodb:UpdateItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:DeleteItem"
+        - "dynamodb:Scan"
+      Resource: "*" 
+    - Effect: Allow
+      Action:
+        - "lambda:InvokeFunction"
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - "kms:Encrypt"
+        - "Kms:Decrypt"
+      Resource: "*"
+    - Effect: Allow
+      Action : 
+        - "ses:SendEmail"
+      Resource : "*"    
+############ PLUGINS 
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-dotenv-plugin
+  - serverless-dynamodb-local
+  - serverless-offline-direct-lambda
+  - serverless-plugin-ifelse
+############ TYPESCRIPT STUFF 
+package:
+  include:
+    handler.ts
+############ LAMBDA FUNCTIONS
+functions:
+  login:
+    handler: handle 
+
+####################### RESOURCES
+resources:
+  Resources:
+    ClientConfigurations:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: "inst_id"
+          AttributeType: "S"
+        KeySchema:
+        - AttributeName: "inst_id"
+          KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.DYNAMO_CLIENT_CONFIG_NAME}
+    JobNotifications:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "inst_id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "inst_id"
+            KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST
+################# CUSTOM 
+        TableName : ${self:custom.DYNAMO_JOB_NOTIFICATION_TABLE}
+custom:
+  ######## ENVIROMENT VARIABLES
+  ######### DYANMO DB CUSTOM 
+  dynamodb: 
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+  ######## FUNCTIONS TO HIDE ON DEPLOY
+  serverlessIfElse:
+    - If: '"${self:provider.stage}" == "prod"'
+      Exclude :
+        - functions.HELLO
+        - functions.CrmSchedule_QA_DAILY
+        - functions.CrmSchedule_QA_WEEKLY
+        - functions.CrmSchedule_QA_MONTHLY
+

@@ -1,0 +1,40 @@
+{
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.33",
+    "@types/aws-sdk": "^2.7.0",
+    "performance-now": "^2.1.0",
+    "serverless": "^1.54.0",
+    "serverless-dotenv-plugin": "^2.1.1",
+    "serverless-dynamodb-local": "^0.2.38",
+    "serverless-offline": "^5.12.0",
+    "serverless-offline-direct-lambda": "^0.0.1",
+    "serverless-offline-kms": "^1.0.0",
+    "serverless-offline-lambda-invoke": "^0.0.6",
+    "serverless-plugin-ifelse": "^1.0.5",
+    "serverless-plugin-typescript": "^1.1.9",
+    "sls": "^0.1.0",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "@types/node": "^12.11.7",
+    "axios": "^0.19.0",
+    "jsontoxml": "^1.0.1",
+    "password-hash": "^1.2.2",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "scripts": {
+    "start": "node_modules/serverless/bin/serverless offline start",
+    "deploy": "node_modules/serverless/bin/serverless -s dev -r us-east-1 deploy",
+    "deploy:prod": "node_modules/serverless/bin/serverless -s prod -r us-west-2 deploy",
+    "deploy:qa": "node_modules/serverless/bin/serverless -s stg -r us-west-2 deploy",
+    "dynamodb": "node_modules/serverless/bin/serverless dynamodb start -p 8000  --migrate true",
+    "dynamodb:install": "node_modules/serverless/bin/serverless dynamodb install"
+  },
+  "name": "CrmIntegration",
+  "version": "1.0.0",
+  "description": "Integrate CRM's together",
+  "main": "index.js",
+  "author": "Ahmad Baderkhan",
+  "license": "MIT"
+}
